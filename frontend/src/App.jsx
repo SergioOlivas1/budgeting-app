@@ -1,13 +1,15 @@
 import { useState } from "react"
 import Login from "./components/Login"
 import Register from "./components/Register"
+import Dashboard from "./components/Dashboard"
 
 function App() {
-  const [showRegister, setShowRegister] = useState(false)
+  const [page, setPage] = useState("login")
+  const [user, setUser] = useState(null)
 
-  return showRegister
-    ? <Register onSwitch={() => setShowRegister(false)} />
-    : <Login onSwitch={() => setShowRegister(true)} onLogin={() => {}} />
+  if (page === "dashboard") return <Dashboard user={user} onLogout={() => setPage("login")} />
+  if (page === "register") return <Register onSwitch={() => setPage("login")} />
+  return <Login onSwitch={() => setPage("register")} onLogin={(u) => { setUser(u); setPage("dashboard") }} />
 }
 
 export default App
