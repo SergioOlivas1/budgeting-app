@@ -196,8 +196,8 @@ function DashboardPage({ user, token }) {
       const headers = { "Authorization": `Bearer ${token}` }
 
       const [txnRes, budgetRes] = await Promise.all([
-        fetch("http://127.0.0.1:5000/api/transactions", { headers }),
-        fetch("http://127.0.0.1:5000/api/budgets", { headers }),
+        fetch(`${import.meta.env.VITE_API_URL}/api/transactions`, { headers }),
+        fetch(`${import.meta.env.VITE_API_URL}/api/budgets`, { headers }),
       ])
 
       const txnData    = await txnRes.json()

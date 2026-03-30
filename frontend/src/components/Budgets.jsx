@@ -56,7 +56,7 @@ export default function Budgets({ token }) {
 const fetchBudgets = async () => {
   setLoading(true)
   try {
-    const res  = await fetch("http://127.0.0.1:5000/api/budgets", {
+    const res  = await fetch(`${import.meta.env.VITE_API_URL}/api/budgets`, {
       headers: { "Authorization": `Bearer ${token}` }
     })
     const data = await res.json()
@@ -71,7 +71,7 @@ const fetchBudgets = async () => {
 const handleSave = async (data) => {
   try {
     if (editBudget) {
-      await fetch(`http://127.0.0.1:5000/api/budgets/${editBudget.id}`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/budgets/${editBudget.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -80,7 +80,7 @@ const handleSave = async (data) => {
         body: JSON.stringify({ limit: data.limit })
       })
     } else {
-      await fetch("http://127.0.0.1:5000/api/budgets", {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/budgets`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -99,7 +99,7 @@ const handleSave = async (data) => {
 
 const handleDelete = async (id) => {
   try {
-    await fetch(`http://127.0.0.1:5000/api/budgets/${id}`, {
+    await fetch(`${import.meta.env.VITE_API_URL}/api/budgets/${id}`, {
       method: "DELETE",
       headers: { "Authorization": `Bearer ${token}` }
     })

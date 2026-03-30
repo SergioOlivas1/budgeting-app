@@ -34,7 +34,7 @@ export default function Transactions({ token }) {
   const fetchTransactions = async () => {
     setLoading(true)
     try {
-      const res  = await fetch("http://127.0.0.1:5000/api/transactions", {
+      const res  = await fetch(`${import.meta.env.VITE_API_URL}/api/transactions`, {
         headers: { "Authorization": `Bearer ${token}` }
       })
       const data = await res.json()
@@ -48,7 +48,7 @@ export default function Transactions({ token }) {
 
   const handleDelete = async (id) => {
     try {
-      await fetch(`http://127.0.0.1:5000/api/transactions/${id}`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/transactions/${id}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       })
@@ -329,7 +329,7 @@ function AddTransactionForm({ onClose, token, onAdded }) {
     setLoading(true)
     setError("")
     try {
-      const res = await fetch("http://127.0.0.1:5000/api/transactions", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/transactions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

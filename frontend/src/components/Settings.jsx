@@ -122,7 +122,7 @@ function ProfileTab({ user, token, onUpdateUser }) {
 
   const handleSave = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:5000/api/user", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/user`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -233,7 +233,7 @@ function SecurityTab({ token }) {
     if (newPw !== confirmPw) { setError("New passwords do not match."); return }
     if (newPw.length < 6)   { setError("Password must be at least 6 characters."); return }
     try {
-      const res = await fetch("http://127.0.0.1:5000/api/user/password", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/user/password`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
