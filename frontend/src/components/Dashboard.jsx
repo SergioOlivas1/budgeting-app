@@ -1,4 +1,7 @@
 import { useState } from "react"
+import Transactions from "./Transactions"
+import Budgets from "./Budgets"
+import Settings from "./Settings"
 
 // ─── Fake Data ───────────────────────────────────────────────────────────────
 const fakeUser = { display_name: "Sergio", email: "sergio@example.com" }
@@ -80,7 +83,7 @@ const navItems = [
 ]
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-export default function Dashboard({ user = fakeUser, onLogout }) {
+export default function Dashboard({ user, token, onLogout, onUpdateUser }) {
   const [activePage, setActivePage] = useState("dashboard")
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
@@ -194,9 +197,9 @@ export default function Dashboard({ user = fakeUser, onLogout }) {
       {/* ── Main Content ── */}
       <main style={styles.main}>
         {activePage === "dashboard" && <DashboardPage user={user} />}
-        {activePage === "transactions" && <PlaceholderPage title="Transactions" icon="💳" />}
-        {activePage === "budgets"      && <PlaceholderPage title="Budgets"      icon="📊" />}
-        {activePage === "settings"     && <PlaceholderPage title="Settings"     icon="⚙️" />}
+        {activePage === "transactions" && <Transactions token={token} />}
+        {activePage === "budgets"      && <Budgets token={token} />}
+        {activePage === "settings" && <Settings user={user} token={token} onLogout={onLogout} onUpdateUser={onUpdateUser} />}
       </main>
     </div>
   )

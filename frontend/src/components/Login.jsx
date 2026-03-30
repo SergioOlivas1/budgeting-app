@@ -21,7 +21,7 @@ export default function Login({ onSwitch, onLogin }) {
       if (!response.ok) {
         setError(data.error)
       } else {
-        if (onLogin) onLogin(data.user)
+        if (onLogin) onLogin(data.user, data.access_token)
       }
     } catch {
       setError("Unable to connect. Please try again.")
