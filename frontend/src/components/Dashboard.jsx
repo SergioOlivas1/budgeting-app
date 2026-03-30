@@ -1,34 +1,7 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Transactions from "./Transactions"
 import Budgets from "./Budgets"
 import Settings from "./Settings"
-
-// ─── Fake Data ───────────────────────────────────────────────────────────────
-const fakeUser = { display_name: "Sergio", email: "sergio@example.com" }
-
-const fakeSummary = {
-  income: 4200.00,
-  expenses: 2840.50,
-  net: 1359.50,
-}
-
-const fakeTransactions = [
-  { id: 1, description: "Salary Deposit",     category: "Income",        type: "income",  amount: 4200.00, txn_date: "2026-03-01" },
-  { id: 2, description: "Whole Foods",         category: "Groceries",     type: "expense", amount: 134.20, txn_date: "2026-03-03" },
-  { id: 3, description: "Netflix",             category: "Subscriptions", type: "expense", amount: 15.99,  txn_date: "2026-03-04" },
-  { id: 4, description: "Electric Bill",       category: "Utilities",     type: "expense", amount: 98.00,  txn_date: "2026-03-05" },
-  { id: 5, description: "Uber",                category: "Transport",     type: "expense", amount: 22.50,  txn_date: "2026-03-06" },
-  { id: 6, description: "Amazon",              category: "Shopping",      type: "expense", amount: 67.99,  txn_date: "2026-03-07" },
-  { id: 7, description: "Spotify",             category: "Subscriptions", type: "expense", amount: 9.99,   txn_date: "2026-03-08" },
-]
-
-const fakeBudgets = [
-  { category: "Groceries",     spent: 134.20, limit: 400.00 },
-  { category: "Subscriptions", spent: 25.98,  limit: 50.00  },
-  { category: "Utilities",     spent: 98.00,  limit: 150.00 },
-  { category: "Transport",     spent: 22.50,  limit: 100.00 },
-  { category: "Shopping",      spent: 67.99,  limit: 200.00 },
-]
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const fmt = (n) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n)
@@ -196,7 +169,7 @@ export default function Dashboard({ user, token, onLogout, onUpdateUser }) {
 
       {/* ── Main Content ── */}
       <main style={styles.main}>
-        {activePage === "dashboard" && <DashboardPage user={user} />}
+        {activePage === "dashboard" && <DashboardPage user={user} token={token} />}
         {activePage === "transactions" && <Transactions token={token} />}
         {activePage === "budgets"      && <Budgets token={token} />}
         {activePage === "settings" && <Settings user={user} token={token} onLogout={onLogout} onUpdateUser={onUpdateUser} />}
@@ -206,8 +179,45 @@ export default function Dashboard({ user, token, onLogout, onUpdateUser }) {
 }
 
 // ─── Dashboard Page ───────────────────────────────────────────────────────────
-function DashboardPage({ user }) {
+function DashboardPage({ user, token }) {
   const date = new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })
+  const [summary, setSummary]           = useState({ income: 0, expenses: 0, net: 0 })
+  const [transactions, setTransactions] = useState([])
+  const [budgets, setBudgets]           = useState([])
+  const [loading, setLoading]           = useState(true)
+
+  useEffect(() => {
+    if (token) fetchDashboardData()
+  }, [token])
+
+  const fetchDashboardData = async () => {
+    setLoading(true)
+    try {
+      const headers = { "Authorization": `Bearer ${token}` }
+
+      const [txnRes, budgetRes] = await Promise.all([
+        fetch("http://127.0.0.1:5000/api/transactions", { headers }),
+        fetch("http://127.0.0.1:5000/api/budgets", { headers }),
+      ])
+
+      const txnData    = await txnRes.json()
+      const budgetData = await budgetRes.json()
+
+      if (Array.isArray(txnData)) {
+        setTransactions(txnData.slice(0, 7))
+        const income   = txnData.filter(t => t.type === "income").reduce((s, t) => s + t.amount, 0)
+        const expenses = txnData.filter(t => t.type === "expense").reduce((s, t) => s + t.amount, 0)
+        setSummary({ income, expenses, net: income - expenses })
+      }
+
+      if (Array.isArray(budgetData)) setBudgets(budgetData)
+
+    } catch {
+      console.error("Failed to fetch dashboard data")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div style={styles.page}>
@@ -226,7 +236,7 @@ function DashboardPage({ user }) {
       <div style={styles.cardsRow}>
         <SummaryCard
           label="Total Income"
-          value={fmt(fakeSummary.income)}
+          value={fmt(summary.income)}
           change="+12% from last month"
           positive={true}
           icon={
@@ -238,7 +248,7 @@ function DashboardPage({ user }) {
         />
         <SummaryCard
           label="Total Expenses"
-          value={fmt(fakeSummary.expenses)}
+          value={fmt(summary.expenses)}
           change="+5% from last month"
           positive={false}
           icon={
@@ -252,7 +262,7 @@ function DashboardPage({ user }) {
         />
         <SummaryCard
           label="Net Savings"
-          value={fmt(fakeSummary.net)}
+          value={fmt(summary.net)}
           change="On track this month"
           positive={true}
           icon={
@@ -274,10 +284,10 @@ function DashboardPage({ user }) {
             <button style={styles.viewAllBtn}>View all →</button>
           </div>
           <div style={styles.txnList}>
-            {fakeTransactions.map((txn, i) => (
+            {transactions.map((txn, i) => (
               <div key={txn.id} style={{
                 ...styles.txnRow,
-                borderBottom: i < fakeTransactions.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
+                borderBottom: i < transactions.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
                 animation: `fadeUp 0.3s ease ${i * 0.05}s both`
               }}>
                 <div style={styles.txnLeft}>
@@ -314,7 +324,7 @@ function DashboardPage({ user }) {
             <span style={styles.monthTag}>March 2026</span>
           </div>
           <div style={styles.budgetList}>
-            {fakeBudgets.map((b, i) => {
+            {budgets.map((b, i) => {
               const pct = Math.min((b.spent / b.limit) * 100, 100)
               const color = getProgressColor(pct)
               return (
